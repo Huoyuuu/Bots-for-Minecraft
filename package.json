@@ -1,0 +1,9 @@
+{
+    "dependencies": {
+        "@types/node": "^18.11.9",
+        "minecraft-data": "^3.18.0",
+        "mineflayer": "^4.5.1",
+        "mineflayer-pathfinder": "^2.4.1",
+        "mineflayer-tool": "^1.2.0",
+    }
+}
