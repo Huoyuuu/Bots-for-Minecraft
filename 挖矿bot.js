@@ -1,20 +1,20 @@
 /**
- * 挖钻石用bot v1.04
+ * 挖钻石用bot v1.05
  * 
  * 支持功能：
  * 自动寻路
  * 自动切换工具
  * 自动挖掘钻石
  * 自动捡拾钻石
+ * 自动清除杂物
+ * 支持通过聊天区进行沟通，参见bot.on('chat', async(username, message)部分的注释
  * 
  * 简单来说，不用操作什么就能挖到钻石了
  * 
  * 更新：
- * 1. 借助直接判定优化对岩浆的处理方式，扩大可采集钻石矿石的范围，现y=4开始且不在岩浆旁边的钻石矿石均可采集。
- * 2. 增加了对多余物品的处理方式，先前直到塞满背包也会持续挖矿，修改后当物品占用范围超过30格时会自动丢弃圆石和各类石头以节省空间。
- * 3. 现聊天后同时会显示已占用背包的数目，以数字形式表示出来，如32等
- * 4. 聊天后显示的钻石数目为总数而非单组数目，如864等。
- * 5. 说出"give me"后，bot会自动走到身边并将所有的钻石交出去，说出"give me all"后，bot会自动走到身边并将所有的物品交出去。
+ * 1. 优化出现异常后的处理方式，防止长时间卡住的情况
+ * 2. 背包满员后可以进一步清空背包，给钻石留出更多的空间
+ * 3. 局部进行了微调
  */
 
 const mineflayer = require('mineflayer')
@@ -23,7 +23,6 @@ const tool = require('mineflayer-tool')
 const { Vec3 } = require('vec3')
 const bot = mineflayer.createBot({
     username: "diamond_bot",
-    port: 6561,
 })
 bot.loadPlugin(pathfinder.pathfinder)
 bot.loadPlugin(tool.plugin)
@@ -40,9 +39,11 @@ function disp(blocks) {
 
 // 全自动挖钻石工作
 async function get_diamond() {
+
     // 初始化
     const mcData = require('minecraft-data')(bot.version)
     const movements = new pathfinder.Movements(bot, mcData)
+    movements.scafoldingBlocks = []
     movements.scafoldingBlocks.push(mcData.blocksByName['stone'].id)
     movements.scafoldingBlocks.push(mcData.blocksByName['cobblestone'].id)
     bot.pathfinder.setMovements(movements)
@@ -61,7 +62,7 @@ async function get_diamond() {
         if (blocks.length == 0) {
             bot.chat("我找不到钻石")
             try {
-                pos = bot.entity.position.offset(100, 0, 100)
+                pos = bot.entity.position.offset(50, 0, 50)
                 new_area_goal = new pathfinder.goals.GoalLookAtBlock(pos)
                 await bot.pathfinder.goto(new_area_goal)
                 continue
@@ -106,7 +107,8 @@ async function get_diamond() {
                 const filter = e => no_lava(e) && e.y >= 4
                 blocks = blocks.filter(filter)
             } catch (e) {
-                bot.chat("出现问题")
+                bot.chat("出现问题  尝试解决ing")
+                bot.stopDigging()
                 console.log(e)
                 continue
             }
@@ -114,17 +116,37 @@ async function get_diamond() {
     }
 }
 
-// 丢弃身上所有满组圆石 + 所有杂牌石头
 async function dropThings() {
-    items = bot.inventory.slots
-    len = items.length
-    for (i = 0; i < len; i++) {
-        item = items[i]
-        if (!item) continue
-        if (item.name == 'cobblestone' && item.count == 64) {
-            await bot.tossStack(bot.inventory.slots[item.slot])
+
+    // 丢弃身上所有满组圆石 + 所有杂牌石头
+    if (bot.inventory.items().length <= 34) {
+        items = bot.inventory.slots
+        len = items.length
+        for (i = 0; i < len; i++) {
+            item = items[i]
+            if (!item) continue
+            if (item.name == 'cobblestone' && item.count == 64) {
+                await bot.tossStack(bot.inventory.slots[item.slot])
+            }
+            if (item.name == 'stone') {
+                await bot.tossStack(bot.inventory.slots[item.slot])
+            }
         }
-        if (item.name == 'stone') {
+    }
+
+    // 丢弃身上除钻石和工具外的绝大多数物品
+    else {
+        items = bot.inventory.slots
+        len = items.length
+        for (i = 0; i < len; i++) {
+            item = items[i]
+            if (!item) continue
+            if (item.name == 'diamond') {
+                continue
+            }
+            if (item.count == 1) {
+                continue
+            }
             await bot.tossStack(bot.inventory.slots[item.slot])
         }
     }
@@ -149,6 +171,13 @@ function no_lava(block) {
     return true
 }
 
+function get_run_time() {
+
+    // 毫秒换算成秒
+    var D2 = (new Date).getTime()
+    return (D2 - D1) / 1000
+}
+
 // 初始化
 bot.once('login', () => {
     bot.chat('/tp Huoyuuu')
@@ -162,21 +191,35 @@ bot.once('spawn', get_diamond)
 var D1 = (new Date).getTime()
 bot.on('chat', async(username, message) => {
     if (username == bot.username) return
-    const filter = e => e.name == 'diamond'
-    var D2 = (new Date).getTime()
 
-    // 毫秒换算成秒
-    bot.chat(`距今已运行${(D2 - D1) / 1000}秒`)
-    count = 0
-    box = bot.inventory.items().filter(filter)
-    len = box.length
-    for (i = 0; i < len; i++) {
-        count += box[i].count
+    // 简要汇报
+    if (message == 'show' || message == 'show all') {
+
+        // 运行时间
+        bot.chat(`已运行${get_run_time()}秒`)
+
+        filter = e => e.name == 'diamond'
+        box = bot.inventory.items().filter(filter)
+        len = box.length
+        count = 0
+        for (i = 0; i < len; i++) {
+            count += box[i].count
+        }
+        bot.chat(`已挖到${count}个钻石`)
+        bot.chat(`钻石总占用${len}格`)
+        bot.chat(`背包总占用${bot.inventory.items().length}格`)
     }
-    bot.chat(`已挖到${count}个钻石`)
-    bot.chat(`总占用${bot.inventory.items().length}格`)
 
-    //交出身上所有钻石
+    // 详细汇报 -> 注意具体信息均显示在控制台上
+    if (message == 'show all') {
+        items = bot.inventory.items();
+        console.log(items)
+        console.log(`已挖到${count}个钻石`)
+        console.log(`钻石总占用${len}格`)
+        console.log(`背包总占用${bot.inventory.items().length}格`)
+    }
+
+    // 交出身上所有钻石
     if (message == "give me") {
         bot.pathfinder.setGoal(new pathfinder.goals.GoalFollow(bot.players['Huoyuuu'].entity));
         all_things = bot.inventory.slots
@@ -188,7 +231,7 @@ bot.on('chat', async(username, message) => {
         }
     }
 
-    //交出身上所有物品
+    // 交出身上所有物品
     if (message == "give me all") {
         bot.pathfinder.setGoal(new pathfinder.goals.GoalFollow(bot.players['Huoyuuu'].entity));
         all_things = bot.inventory.slots
