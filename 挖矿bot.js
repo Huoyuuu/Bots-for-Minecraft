@@ -78,7 +78,7 @@ async function get_diamond() {
             bot.chat("我找不到" + goal_name)
             try {
                 pos = bot.entity.position.offset(50, 0, 50)
-                new_area_goal = new pathfinder.goals.GoalLookAtBlock(pos)
+                new_area_goal = new pathfinder.goals.GoalLookAtBlock(pos, bot.world)
                 await bot.pathfinder.goto(new_area_goal)
                 continue
             } catch {
