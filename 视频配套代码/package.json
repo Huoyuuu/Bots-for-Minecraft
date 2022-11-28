@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "mineflayer": "^4.5.1",
-    "mineflayer-pathfinder": "^2.4.1"
+    "mineflayer-pathfinder": "^2.4.1",
+    "mineflayer-tool": "^1.2.0",
+    "vec3": "^0.1.7"
   }
 }
