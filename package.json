@@ -2,9 +2,14 @@
     "dependencies": {
         "@types/node": "^18.11.9",
         "minecraft-data": "^3.18.0",
+        "minecraft-protocol": "^1.36.1",
         "mineflayer": "^4.5.1",
+        "mineflayer-auto-eat": "^3.2.0",
         "mineflayer-pathfinder": "^2.4.1",
+        "mineflayer-repl": "^1.0.1",
         "mineflayer-tool": "^1.2.0",
-	"vec3": "^0.1.7"
+        "mineflayer-web-inventory": "^1.8.3",
+        "moment": "^2.29.4",
+        "vec3": "^0.1.7"
     }
 }
