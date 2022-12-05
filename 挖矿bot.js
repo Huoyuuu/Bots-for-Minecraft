@@ -419,7 +419,7 @@ function get_run_time() {
     return (D2 - D1) / 1000
 }
 
-bot.once('spwan', () => {
+bot.once('spawn', () => {
     bot.autoEat.options = {
         priority: "saturation",
         startAt: 14,
