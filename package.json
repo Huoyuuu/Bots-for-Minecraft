@@ -1,15 +1,20 @@
 {
-    "dependencies": {
-        "@types/node": "^18.11.9",
-        "minecraft-data": "^3.18.0",
-        "minecraft-protocol": "^1.36.1",
-        "mineflayer": "^4.5.1",
-        "mineflayer-auto-eat": "^3.2.0",
-        "mineflayer-pathfinder": "^2.4.1",
-        "mineflayer-repl": "^1.0.1",
-        "mineflayer-tool": "^1.2.0",
-        "mineflayer-web-inventory": "^1.8.3",
-        "moment": "^2.29.4",
-        "vec3": "^0.1.7"
-    }
+  "name": "minebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.3",
+    "mineflayer": "^4.20.0",
+    "mineflayer-auto-eat": "^3.3.6",
+    "mineflayer-pathfinder": "^2.4.5",
+    "mineflayer-web-inventory": "^1.8.4"
+  }
 }

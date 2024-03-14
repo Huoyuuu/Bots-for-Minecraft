@@ -1,0 +1,57 @@
+# Node.js 依赖包
+node_modules/
+
+# 日志文件
+logs/
+*.log
+
+# 临时文件
+tmp/
+*.tmp
+*.swp
+
+# 编辑器生成的文件
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# 操作系统生成的文件
+.DS_Store
+Thumbs.db
+
+# 配置文件
+config.js
+auth.json
+
+# 构建产物
+dist/
+build/
+
+# 测试覆盖率报告
+coverage/
+
+# 调试文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 个人笔记和文档
+notes/
+docs/
+
+# 压缩包
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# 其他自定义文件和文件夹
+# 根据项目实际情况添加
